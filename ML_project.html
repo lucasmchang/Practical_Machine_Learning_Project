@@ -64,23 +64,41 @@ img {
 </div>
 
 
-<p>**Synopsis</p>
+<div id="synopsis" class="section level2">
+<h2>Synopsis</h2>
 <p>In this project, I test out several machine learning models for predicted the manner of barbell lifts. Subjects lifted a dumbbell in a correct way and four different incorrect ways, and classifiers were trained to predict the class based on motion-capture measurements. The highest performing algorithm was random forests without PCA pre-processing, achieving 93% accuracy in cross-validation. Code to download the dataset and execute all analyses is included in the rmarkdown file that generates this document.</p>
-<p>**Data</p>
+</div>
+<div id="data" class="section level2">
+<h2>Data</h2>
 <p>Data come from <a href="http://groupware.les.inf.puc-rio.br/har" class="uri">http://groupware.les.inf.puc-rio.br/har</a> . Features used for prediction include the user name (six participants contributed training data) and 52 additional features from motion capture devices, which were pitch, roll, yaw, total acceleration, gyros (in the x, y, and z direction), acceleration (in the x, y, and z direction), and magnet (in the x, y, and z direction) for the belt, arm, forearm, and dumbbell. There were a total of 19622 observations in the training set; however, many observations are successive rows from the same lift. 858 independent recording windows were included in the training data. A separate testing set consisted of 20 test cases.</p>
 <pre><code>## Loading required package: lattice
 ## Loading required package: ggplot2</code></pre>
-<p>**Methods</p>
-<p>***Data Cleaning</p>
+</div>
+<div id="methods" class="section level2">
+<h2>Methods</h2>
+<div id="data-cleaning" class="section level3">
+<h3>Data Cleaning</h3>
 <p>The raw data additionally contained columns for data that was aggregated over time, and missing for most observations. These were removed, as predictions are at single time points. I also remove columns for time stamps, as these are likely to produce overfitting by capturing idiosyncratic patterns of a single lifting session, and I remove tags that define the start and end of recording windows (after using them to define folds, see below). A total of 53 features are used in the model, and no values are missing.</p>
-<p>***Cross Validation</p>
+</div>
+<div id="cross-validation" class="section level3">
+<h3>Cross Validation</h3>
 <p>In order to limit computation time, for initial model selection we used 3-fold cross-validation on 15% of the training dataset. After selecting the best-performing algorithm, it was trained on the entire training set, again with 3-fold cross-validation. Folds were generated with the restriction that all observations from the same lift were assigned to the same fold. As a result, the folds had only approximately the same number of observations.</p>
-<p>***Model Fitting</p>
+</div>
+<div id="model-fitting" class="section level3">
+<h3>Model Fitting</h3>
 <p>The caret package was used to train models. Each algorithm was evaluated with and without PCA pre-processing, which selected components to account for 95% of the total variance. The following models were evaluated:</p>
-<p>-Classification tree -Linear Discriminant Analysis -Random forest</p>
+<ul>
+<li>Classification tree</li>
+<li>Linear Discriminant Analysis</li>
+<li>Random forest</li>
+</ul>
 <p>For classification trees, the cp parameter was tuned with a grid search. For random forest, the mtry parameter was tuned with a grid search. No free parameters were tuned in linear discriminat analysis. Of the six models, only the one that performed the best in cross-validation was trained on the entire training data.</p>
-<p>**Algorithm Comparison Results</p>
-<p>*** Classification tree (rpart)</p>
+</div>
+</div>
+<div id="algorithm-comparison-results" class="section level2">
+<h2>Algorithm Comparison Results</h2>
+<div id="classification-tree-rpart" class="section level3">
+<h3>Classification tree (rpart)</h3>
 <pre><code>## Loading required package: rpart</code></pre>
 <pre><code>## CART 
 ## 
@@ -104,7 +122,9 @@ img {
 ## 
 ## Accuracy was used to select the optimal model using  the largest value.
 ## The final value used for the model was cp = 0.001.</code></pre>
-<p>*** Classification tree (rpart) with PCA</p>
+</div>
+<div id="classification-tree-rpart-with-pca" class="section level3">
+<h3>Classification tree (rpart) with PCA</h3>
 <pre><code>## CART 
 ## 
 ## 3000 samples
@@ -128,7 +148,9 @@ img {
 ## 
 ## Accuracy was used to select the optimal model using  the largest value.
 ## The final value used for the model was cp = 0.001.</code></pre>
-<p>*** Linear discriminant analysis</p>
+</div>
+<div id="linear-discriminant-analysis" class="section level3">
+<h3>Linear discriminant analysis</h3>
 <pre><code>## Loading required package: MASS</code></pre>
 <pre><code>## Linear Discriminant Analysis 
 ## 
@@ -145,7 +167,9 @@ img {
 ##   0.6604439  0.5710325  0.02101849   0.02826635
 ## 
 ## </code></pre>
-<p>*** Linear discriminant analysis with PCA</p>
+</div>
+<div id="linear-discriminant-analysis-with-pca" class="section level3">
+<h3>Linear discriminant analysis with PCA</h3>
 <pre><code>## Linear Discriminant Analysis 
 ## 
 ## 3000 samples
@@ -162,7 +186,9 @@ img {
 ##   0.4737518  0.3360766  0.0275208    0.03132723
 ## 
 ## </code></pre>
-<p>*** Random forest</p>
+</div>
+<div id="random-forest" class="section level3">
+<h3>Random forest</h3>
 <pre><code>## Loading required package: randomForest
 ## randomForest 4.6-12
 ## Type rfNews() to see new features/changes/bug fixes.</code></pre>
@@ -184,7 +210,9 @@ img {
 ## 
 ## Accuracy was used to select the optimal model using  the largest value.
 ## The final value used for the model was mtry = 15.</code></pre>
-<p>*** Random forest with PCA</p>
+</div>
+<div id="random-forest-with-pca" class="section level3">
+<h3>Random forest with PCA</h3>
 <pre><code>## Random Forest 
 ## 
 ## 3000 samples
@@ -204,12 +232,24 @@ img {
 ## 
 ## Accuracy was used to select the optimal model using  the largest value.
 ## The final value used for the model was mtry = 5.</code></pre>
-<p>**Final Model</p>
+<p>Summary of accuracy of models on subsetted training data:</p>
+<ul>
+<li>Classification tree: .72</li>
+<li>Linear Discriminant Analysis: .66</li>
+<li>Random forest:</li>
+<li>Classification tree+PCA: .49</li>
+<li>Linear Discriminant Analysis+PCA: .89</li>
+<li>Random forest+PCA: .73</li>
+</ul>
+</div>
+</div>
+<div id="final-model" class="section level2">
+<h2>Final Model</h2>
 <p>Because the best performance was the random forest without PCA, that model was retrained on the whole training set with the same parameters.</p>
 <pre class="r"><code>model &lt;- train(training[,-54],
       training[,54],
       trControl = trainControl(method = &quot;cv&quot;, index = folds),
-      tuneGrid = data.frame(mtry = c(10)),
+      tuneGrid = data.frame(mtry = c(15)),
       method = &quot;rf&quot;)
 print(model)</code></pre>
 <pre><code>## Random Forest 
@@ -223,18 +263,23 @@ print(model)</code></pre>
 ## Summary of sample sizes: 13145, 13133, 12966 
 ## Resampling results
 ## 
-##   Accuracy   Kappa     Accuracy SD  Kappa SD  
-##   0.9293241  0.910299  0.01895798   0.02436423
+##   Accuracy   Kappa      Accuracy SD  Kappa SD  
+##   0.9308708  0.9122524  0.02000285   0.02567511
 ## 
-## Tuning parameter 'mtry' was held constant at a value of 10
+## Tuning parameter 'mtry' was held constant at a value of 15
 ## </code></pre>
-<p>**Conclusion:</p>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
 <p>The highest performing algorithm for this dataset was random forest, reaching 93% accuracy in cross-validation. PCA pre-processing decreased the performance of all algorithms. This could occur because small variations in certain variables carry a lot of predictive information, but are not well reflected in the overall principal components.</p>
 <p>Prediction accuracy on a large out-of-sample test set would be expected to be around 93%. Predictions for the 20 given test cases are below:</p>
-<p>**Test case predictions:</p>
+</div>
+<div id="test-case-predictions" class="section level2">
+<h2>Test case predictions</h2>
 <pre class="r"><code>predict(model, testing[,-54])</code></pre>
 <pre><code>##  [1] B A B A A E D B A A B C B A E E A B B B
 ## Levels: A B C D E</code></pre>
+</div>
 
 
 </div>

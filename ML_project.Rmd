@@ -3,13 +3,13 @@ title: "Comparing Machine Learning Algorithms for Predicting Form of Dumbbell Li
 output: html_document
 ---
 
-**Synopsis
+##Synopsis
 
 In this project, I test out several machine learning models for predicted the manner of barbell lifts. Subjects lifted a dumbbell in a correct way and four different incorrect ways, and classifiers were trained to predict the class based on motion-capture measurements. The highest performing algorithm was random forests without PCA pre-processing, achieving 93% accuracy in cross-validation.  Code to download the dataset and execute all analyses is included in the rmarkdown file that generates this document.
 
 
 
-**Data
+##Data
 
 Data come from  http://groupware.les.inf.puc-rio.br/har . Features used for prediction include the user name (six participants contributed training data) and 52 additional features from motion capture devices, which were pitch, roll, yaw, total acceleration, gyros (in the x, y, and z direction), acceleration (in the x, y, and z direction), and magnet (in the x, y, and z direction) for the belt, arm, forearm, and dumbbell. There were a total of 19622 observations in the training set; however, many observations are successive rows from the same lift. 858 independent recording windows were included in the training data. A separate testing set consisted of 20 test cases.
 
@@ -29,9 +29,9 @@ testing <- read.csv("data/testing.csv")
 originaltraining <- read.csv("data/training.csv")
 ```
 
-**Methods
+##Methods
 
-***Data Cleaning
+###Data Cleaning
 
 The raw data additionally contained columns for data that was aggregated over time, and missing for most observations. These were removed, as predictions are at single time points. I also remove columns for time stamps, as these are likely to produce overfitting by capturing idiosyncratic patterns of a single lifting session, and I remove tags that define the start and end of recording windows (after using them to define folds, see below). A total of 53 features are used in the model, and no values are missing.
 
@@ -81,23 +81,23 @@ for (v in vars_to_remove)
 ```
 
 
-***Cross Validation
+###Cross Validation
 
 In order to limit computation time, for initial model selection we used 3-fold cross-validation on 15% of the training dataset. After selecting the best-performing algorithm, it was trained on the entire training set, again with 3-fold cross-validation. Folds were generated with the restriction that all observations from the same lift were assigned to the same fold. As a result, the folds had only approximately the same number of observations.
 
-***Model Fitting
+###Model Fitting
 
 The caret package was used to train models. Each algorithm was evaluated with and without PCA pre-processing, which selected components to account for 95% of the total variance. The following models were evaluated:
 
--Classification tree
--Linear Discriminant Analysis
--Random forest
+- Classification tree
+- Linear Discriminant Analysis
+- Random forest
 
 For classification trees, the cp parameter was tuned with a grid search. For random forest, the mtry parameter was tuned with a grid search. No free parameters were tuned in linear discriminat analysis. Of the six models, only the one that performed the best in cross-validation was trained on the entire training data.
 
-**Algorithm Comparison Results
+##Algorithm Comparison Results
 
-*** Classification tree (rpart) 
+### Classification tree (rpart) 
 ```{r echo = F}
 train(training[,-54],
       training[,54],
@@ -106,7 +106,7 @@ train(training[,-54],
       method = "rpart")
 ```
 
-*** Classification tree (rpart) with PCA 
+### Classification tree (rpart) with PCA 
 ```{r echo = F}
 train(training[,-54],
       training[,54],
@@ -116,7 +116,7 @@ train(training[,-54],
       method = "rpart")
 ```
 
-*** Linear discriminant analysis
+### Linear discriminant analysis
 ```{r echo = F}
 train(training[,-c(1,54)],
       training[,54],
@@ -124,7 +124,7 @@ train(training[,-c(1,54)],
       method = "lda")
 ```
 
-*** Linear discriminant analysis with PCA
+### Linear discriminant analysis with PCA
 ```{r echo = F}
 train(training[,-c(1,54)],
       training[,54],
@@ -133,7 +133,7 @@ train(training[,-c(1,54)],
       method = "lda")
 ```
 
-*** Random forest
+### Random forest
 ```{r echo = F}
 train(training[,-54],
       training[,54],
@@ -142,7 +142,7 @@ train(training[,-54],
       method = "rf")
 ```
 
-*** Random forest with PCA
+### Random forest with PCA
 ```{r echo = F}
 train(training[,-54],
       training[,54],
@@ -152,7 +152,16 @@ train(training[,-54],
       method = "rf")
 ```
 
-**Final Model
+Summary of accuracy of models on subsetted training data:
+
+- Classification tree: .72
+- Linear Discriminant Analysis: .66
+- Random forest:
+- Classification tree+PCA: .49
+- Linear Discriminant Analysis+PCA: .89
+- Random forest+PCA: .73
+
+##Final Model
 
 Because the best performance was the random forest without PCA, that model was retrained on the whole training set with the same parameters.
 
@@ -202,18 +211,18 @@ for (v in vars_to_remove)
 model <- train(training[,-54],
       training[,54],
       trControl = trainControl(method = "cv", index = folds),
-      tuneGrid = data.frame(mtry = c(10)),
+      tuneGrid = data.frame(mtry = c(15)),
       method = "rf")
 print(model)
 ```
 
-**Conclusion:
+##Conclusion
 
 The highest performing algorithm for this dataset was random forest, reaching 93% accuracy in cross-validation. PCA pre-processing decreased the performance of all algorithms. This could occur because small variations in certain variables carry a lot of predictive information, but are not well reflected in the overall principal components. 
 
 Prediction accuracy on a large out-of-sample test set would be expected to be around 93%. Predictions for the 20 given test cases are below:
 
-**Test case predictions:
+##Test case predictions
 
 ```{r}
 predict(model, testing[,-54])
